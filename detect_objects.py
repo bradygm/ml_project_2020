@@ -1,16 +1,10 @@
 import cv2
 import numpy as np
-from scipy.ndimage.morphology import distance_transform_edt
 import scipy.ndimage.morphology
 from planarH import ransacH
 import matplotlib.patches
 from BRIEF import briefLite,briefMatch,plotMatches
 import matplotlib.pyplot as plt
-import skimage
-import skimage.measure
-import skimage.color
-import skimage.restoration
-import skimage.filters
 import skimage.morphology
 import skimage.segmentation
 
