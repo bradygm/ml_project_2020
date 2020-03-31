@@ -23,6 +23,11 @@ y_test = keras.utils.to_categorical(np.load(sys.argv[4]).astype(int), 2)
 logdir = "logs/scalars/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
 
+# Early stopping
+earlystop_callback = keras.callbacks.EarlyStopping(
+    monitor='val_accuracy', min_delta=0.0001,
+    patience=2)
+
 # Build LeNet model
 inputs = keras.Input(shape=(28, 28, 3), name='cropped_images')
 conv1 = Conv2D(filters=16, kernel_size=(5, 5), activation='relu', input_shape=(28, 28, 3))(inputs)
@@ -38,24 +43,19 @@ model = keras.Model(inputs=inputs, outputs=outputs, name='lenet_model')
 model.summary()
 
 METRICS = [
-      keras.metrics.TruePositives(name='tp'),
-      keras.metrics.FalsePositives(name='fp'),
-      keras.metrics.TrueNegatives(name='tn'),
-      keras.metrics.FalseNegatives(name='fn'), 
-      keras.metrics.BinaryAccuracy(name='accuracy'),
-      keras.metrics.Precision(name='precision'),
-      keras.metrics.Recall(name='recall')
+    keras.metrics.FalsePositives(name='fp'),
+    keras.metrics.BinaryAccuracy(name='accuracy')
 ]
 
 model.compile(optimizer=keras.optimizers.Adadelta(),
               loss="categorical_crossentropy",
               metrics=METRICS)
 
-training_history = model.fit(x_train, y_train, validation_split=0.25, batch_size=64, epochs=10, shuffle=True, callbacks=[tensorboard_callback])
+training_history = model.fit(x_train, y_train, validation_split=0.25, batch_size=64, epochs=15, shuffle=True, callbacks=[tensorboard_callback, earlystop_callback])
 model.evaluate(x_test, y_test, verbose=2)
 
 print("Average test loss: ", np.average(training_history.history['loss']))
 
 model.reset_metrics()
 predictions = model.predict(x_test)
-model.save('lenet.h5')
+model.save('models/lenet_bird.h5')
