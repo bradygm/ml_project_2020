@@ -128,6 +128,8 @@ def briefLite(im):
     '''
     ###################
     locsDoG, gaussian_pyramid = DoGdetector(im)
+    if type(locsDoG) is bool:
+        return False, False
     k = np.sqrt(2)
     levels = [-1, 0, 1, 2, 3, 4]
     locs, desc = computeBrief(im, gaussian_pyramid, locsDoG, k, levels, compareX, compareY)

@@ -124,6 +124,8 @@ def getLocalExtrema(DoG_pyramid, DoG_levels, principal_curvature,
                 points_maxmin.append(one_point)
             elif current_value > neighbor_max:
                 points_maxmin.append(one_point)
+        if len(points_maxmin) < 1:
+            return False
         points_extrema = np.stack(points_maxmin, axis=0)
 
         points_shape = np.shape(points_extrema)
