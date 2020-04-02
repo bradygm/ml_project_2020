@@ -31,7 +31,7 @@ def find_moving_objects(im1, im2, save_full_output_images, output_folder, thresh
     diff = np.abs(new_im2[:, :, 0].astype(float) - im1[:, :, 0].astype(float))
     # cv2.imshow('diff', diff)
     mask = diff > thresh
-    mask = scipy.ndimage.binary_erosion(mask)
+    # mask = scipy.ndimage.binary_erosion(mask)
     # mask = scipy.ndimage.binary_erosion(mask)
     mask = scipy.ndimage.binary_dilation(mask)
     mask = scipy.ndimage.binary_dilation(mask)
@@ -73,8 +73,8 @@ def find_moving_objects(im1, im2, save_full_output_images, output_folder, thresh
     if save_full_output_images:
         plt.savefig(output_folder + str(j) + '.jpg')
         plt.clf()
-    else:
-        plt.show()
+    # else:
+    #     plt.show()
     return new_im2, bboxes
 
 
