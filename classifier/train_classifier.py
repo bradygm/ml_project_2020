@@ -48,12 +48,14 @@ conv1 = Conv2D(filters=16, kernel_size=(5, 5), activation='relu', input_shape=(2
 mpool1 = MaxPool2D()(conv1)
 conv2 = Conv2D(filters=32, kernel_size=(3, 3), activation='relu')(mpool1)
 mpool2 = MaxPool2D()(conv2)
-dropout1 = Dropout(0.25)(mpool2)
-f1 = Flatten()(dropout1)
+conv3 = Conv2D(filters=64, kernel_size=(3, 3), activation='relu')(mpool2)
+mpool3 = MaxPool2D()(conv3)
+# dropout1 = Dropout(0.25)(mpool2)
+f1 = Flatten()(mpool3)
 f2 = Dense(128, activation='relu')(f1)
-f3 = Dense(64, activation='relu')(f2)
-f4 = Dense(32, activation='relu')(f3)
-outputs = Dense(3, activation='softmax')(f4)
+# f3 = Dense(64, activation='relu')(f2)
+# f4 = Dense(32, activation='relu')(f3)
+outputs = Dense(3, activation='softmax')(f2)
 
 model = keras.Model(inputs=inputs, outputs=outputs, name='lenet_model')
 model.summary()
@@ -62,11 +64,11 @@ METRICS = [
     keras.metrics.CategoricalAccuracy(name='categorical_accuracy')
 ]
 
-model.compile(optimizer=keras.optimizers.Adadelta(),
+model.compile(optimizer=keras.optimizers.SGD(lr=0.01),
               loss="categorical_crossentropy",
               metrics=METRICS)
 
-training_history = model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=15, shuffle=True, callbacks=[tensorboard_callback])
+training_history = model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=10, shuffle=True, callbacks=[tensorboard_callback, earlystop_callback])
 model.evaluate(x_test, y_test, verbose=2)
 
 print("Average train loss: ", np.average(training_history.history['loss']))
