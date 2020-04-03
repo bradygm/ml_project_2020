@@ -28,33 +28,33 @@ print(np.sum(y_train), y_train.shape[0])
 print(x_test.shape)
 print(np.sum(y_test), y_test.shape[0])
 
-# for i in range(x_test.shape[0]):
-#   if y_test[i] == 0:
-#     continue
-#   cv2.imshow("image", x_test[i])
-#   print(y_test[i])
-#   if cv2.waitKey(0) > 0:
-#       continue
+for i in range(x_train.shape[0]):
+  # if y_test[i] == 0:
+  #   continue
+  cv2.imshow("image", x_train[i])
+  print(y_test[i])
+  if cv2.waitKey(0) > 0:
+      continue
 
-model = keras.models.load_model('lenet.h5')
-predictions = model.predict(x_test)
+# model = keras.models.load_model('lenet.h5')
+# predictions = model.predict(x_test)
 
-fp = 0
-tp = 0
-fn = 0
-tn = 0
+# fp = 0
+# tp = 0
+# fn = 0
+# tn = 0
 
-for i in range(predictions.shape[0]):
-  p = predictions[i]
-  if y_test[i] == 0: # true nonbird
-    if p[0] >= p[1]: # true negative
-      tn += 1
-    else:            # false positive
-      fp += 1
-  else:              # true bird
-    if p[1] >= p[0]: # true positive
-      tp += 1
-    else:            # false negative
-      fn += 1
+# for i in range(predictions.shape[0]):
+#   p = predictions[i]
+#   if y_test[i] == 0: # true nonbird
+#     if p[0] >= p[1]: # true negative
+#       tn += 1
+#     else:            # false positive
+#       fp += 1
+#   else:              # true bird
+#     if p[1] >= p[0]: # true positive
+#       tp += 1
+#     else:            # false negative
+#       fn += 1
 
-print(fp, tp, fn, tn)
+# print(fp, tp, fn, tn)

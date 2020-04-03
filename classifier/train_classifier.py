@@ -9,15 +9,29 @@ import matplotlib.pyplot as plt
 import sys
 
 
+def split_validation_set(x_data, y_data, val_split=0.8):
+    idx = np.arange(x_data.shape[0])
+    np.random.shuffle(idx)
+    train_samples = int(val_split * x_data.shape[0])
+    train_idx = idx[:train_samples]
+    val_idx = idx[train_samples:]
+
+    x_train, x_val = x_data[train_idx, :, :, :], x_data[val_idx, :, :, :]
+    y_train, y_val = y_data[train_idx, :], y_data[val_idx, :]
+    return x_train, y_train, x_val, y_val
+
+
 config = ConfigProto()
 config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 
-x_train = np.load(sys.argv[1]).astype(float) / 255.0
-y_train = keras.utils.to_categorical(np.load(sys.argv[2]).astype(int), 2)
+x_data = np.load(sys.argv[1]).astype(float)
+y_data = keras.utils.to_categorical(np.load(sys.argv[2]).astype(int), 3)
 
-x_test = np.load(sys.argv[3]).astype(float) / 255.0
-y_test = keras.utils.to_categorical(np.load(sys.argv[4]).astype(int), 2)
+x_train, y_train, x_val, y_val = split_validation_set(x_data, y_data)
+
+x_test = np.load(sys.argv[3]).astype(float)
+y_test = keras.utils.to_categorical(np.load(sys.argv[4]).astype(int), 3)
 
 # Tensorboard
 logdir = "logs/scalars/" + datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -25,7 +39,7 @@ tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
 
 # Early stopping
 earlystop_callback = keras.callbacks.EarlyStopping(
-    monitor='val_accuracy', min_delta=0.0001,
+    monitor='val_categorical_accuracy', min_delta=0.0001,
     patience=2)
 
 # Build LeNet model
@@ -37,25 +51,26 @@ mpool2 = MaxPool2D()(conv2)
 dropout1 = Dropout(0.25)(mpool2)
 f1 = Flatten()(dropout1)
 f2 = Dense(128, activation='relu')(f1)
-outputs = Dense(2, activation='softmax')(f2)
+f3 = Dense(64, activation='relu')(f2)
+f4 = Dense(32, activation='relu')(f3)
+outputs = Dense(3, activation='softmax')(f4)
 
 model = keras.Model(inputs=inputs, outputs=outputs, name='lenet_model')
 model.summary()
 
 METRICS = [
-    keras.metrics.FalsePositives(name='fp'),
-    keras.metrics.BinaryAccuracy(name='accuracy')
+    keras.metrics.CategoricalAccuracy(name='categorical_accuracy')
 ]
 
 model.compile(optimizer=keras.optimizers.Adadelta(),
               loss="categorical_crossentropy",
               metrics=METRICS)
 
-training_history = model.fit(x_train, y_train, validation_split=0.25, batch_size=64, epochs=15, shuffle=True, callbacks=[tensorboard_callback, earlystop_callback])
+training_history = model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=15, shuffle=True, callbacks=[tensorboard_callback])
 model.evaluate(x_test, y_test, verbose=2)
 
-print("Average test loss: ", np.average(training_history.history['loss']))
+print("Average train loss: ", np.average(training_history.history['loss']))
 
 model.reset_metrics()
-predictions = model.predict(x_test)
-model.save('models/lenet_bird.h5')
+# predictions = model.predict(x_test)
+model.save('models/lenet_all.h5')
