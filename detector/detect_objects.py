@@ -16,7 +16,10 @@ def find_moving_objects(im1, im2, save_full_output_images, output_folder, thresh
     if type(locs1) is bool or type(locs2) is bool:
         return False, False
     matches = briefMatch(desc1, desc2)
-    bestH = ransacH(matches, locs1, locs2, num_iter=5000, tol=.1)
+    # bestH = ransacH(matches, locs1, locs2, num_iter=5000, tol=.1)
+    src_pts = np.copy(locs1[matches[:,0],0:2])
+    dst_pts = np.copy(locs2[matches[:,1],0:2])
+    bestH, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 3.0)
     if len(im1.shape) > 2:
         h, w, _ = im1.shape
     else:
