@@ -9,12 +9,12 @@ import skimage.morphology
 import skimage.segmentation
 
 
-def find_moving_objects(im1, im2, save_full_output_images, output_folder, thresh=7):
+def find_moving_objects(im1, im2, save_full_output_images, output_folder, thresh=20):
     # Find Homography
     locs1, desc1 = briefLite(im1)
     locs2, desc2 = briefLite(im2)
     if type(locs1) is bool or type(locs2) is bool:
-        return False, False
+        return False, False, False
     matches = briefMatch(desc1, desc2)
     # bestH = ransacH(matches, locs1, locs2, num_iter=5000, tol=.1)
     src_pts = np.copy(locs1[matches[:,0],0:2])
@@ -78,7 +78,7 @@ def find_moving_objects(im1, im2, save_full_output_images, output_folder, thresh
         plt.clf()
     # else:
     #     plt.show()
-    return new_im2, bboxes
+    return new_im2, bboxes, bw
 
 
 def format_for_network(bboxes, new_im2):
